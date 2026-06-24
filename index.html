@@ -76,6 +76,36 @@
       console.log("=== START LIFF ===");
       updateStatus("Preparing your request...");
 
+      // 1. จัดการ Parameter (รองรับระบบ Redirect Link เดิม)
+      function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has(name)) return urlParams.get(name);
+        if (urlParams.has("liff.state")) {
+          const state = decodeURIComponent(urlParams.get("liff.state"));
+          const stateParams = new URLSearchParams(state.indexOf('?') !== -1 ? state.split('?')[1] : state);
+          if (stateParams.has(name)) return stateParams.get(name);
+        }
+        return null;
+      }
+
+      let contentId = getQueryParam("content_id") || localStorage.getItem("contentId") || "unknown";
+      let target = getQueryParam("target") || localStorage.getItem("target") || "";
+
+      // เก็บค่าเข้า localStorage กันหายระหว่าง Login
+      if (contentId !== "unknown") localStorage.setItem("contentId", contentId);
+      if (target !== "") localStorage.setItem("target", target);
+
+      // เตรียม URL ปลายทางกรณีเป็น Tracking Link
+      let finalUrl = "";
+      if (target) {
+        if (target.startsWith("http://") || target.startsWith("https://")) {
+          finalUrl = target;
+        } else {
+          const base = "https://www.roche.co.th/";
+          finalUrl = base + target.replace(/^\/+/, "");
+        }
+      }
+
       // LIFF Initialization
       try {
         updateStatus("Connecting...");
@@ -92,29 +122,39 @@
         const name = profile.displayName;
         const pictureUrl = profile.pictureUrl || "";
 
-        // เตรียม URL สำหรับเปลี่ยนหน้าไปยัง register.html
+        // เตรียมข้อมูลปลายทาง
         const currentDir = window.location.href.split('?')[0].split('/').slice(0, -1).join('/');
-        const redirectUrl = `${currentDir}/register.html?userId=${encodeURIComponent(userId)}`;
-
-        // ส่งข้อมูลไป Supabase
-        updateStatus("Loading...");
-
-        const payload = {
+        const isTracking = target !== "";
+        
+        // แยก Payload และตารางที่ต้องการบันทึกตามประเภทการเข้าใช้งาน
+        const payload = isTracking ? {
+          user_id: userId,
+          display_name: name,
+          picture_url: pictureUrl,
+          content_id: contentId,
+          target: target,
+          full_url: finalUrl
+        } : {
           user_id: userId,
           display_name: name,
           picture_url: pictureUrl,
           status: "Pending Register"
         };
 
+        const tableName = isTracking ? "liff_logs" : "members";
+        const redirectUrl = isTracking ? finalUrl : `${currentDir}/register.html?userId=${encodeURIComponent(userId)}`;
+
+        // ส่งข้อมูลไป Supabase
+        updateStatus("Loading...");
+
         try {
           if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            // รองรับทั้งแบบระบุเฉพาะ Project ID และระบุ URL เต็มรูปแบบ
-            let finalUrl = SUPABASE_URL;
+            let finalUrlSupabase = SUPABASE_URL;
             if (!SUPABASE_URL.startsWith("http://") && !SUPABASE_URL.startsWith("https://")) {
-              finalUrl = `https://${SUPABASE_URL}.supabase.co`;
+              finalUrlSupabase = `https://${SUPABASE_URL}.supabase.co`;
             }
-            const cleanBaseUrl = finalUrl.replace(/\/$/, "");
-            const supabaseEndpoint = `${cleanBaseUrl}/rest/v1/members`;
+            const cleanBaseUrl = finalUrlSupabase.replace(/\/$/, "");
+            const supabaseEndpoint = `${cleanBaseUrl}/rest/v1/${tableName}`;
 
             await Promise.race([
               fetch(supabaseEndpoint, {
@@ -130,15 +170,21 @@
               }),
               new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
             ]);
+
+            // บันทึกสำเร็จ ให้ล้าง localStorage ของระบบ Redirect Link
+            if (isTracking) {
+              localStorage.removeItem("target");
+              localStorage.removeItem("contentId");
+            }
           } else {
             console.warn("Supabase configuration is incomplete. Skipping database logging.");
           }
         } catch (e) {
-          console.log("Supabase Request finished or timed out (Normal if user already exists):", e);
+          console.log("Supabase Request finished or timed out:", e);
         }
 
         // Redirect
-        updateStatus("Redirecting to registration form...");
+        updateStatus(isTracking ? "Redirecting to destination..." : "Redirecting to registration form...");
         setTimeout(() => {
           window.location.replace(redirectUrl);
         }, 200);
