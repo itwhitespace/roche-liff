@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Please wait...</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    /* ปรับแต่งหน้าตา Loading */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f8f9fa;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* CSS สำหรับวงกลมหมุน (Spinner) */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0055ff;
+      /* สีน้ำเงินสไตล์ Roche */
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .status-text {
+      color: #555;
+      font-size: 16px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="loader"></div>
+    <div id="status" class="status-text">Starting system...</div>
+  </div>
+
+  <script>
+    // --- Supabase Config Section (กรอกข้อมูลการเชื่อมต่อที่นี่) ---
+    const SUPABASE_URL = "knkcassjktpolmpdfqfb";       // ตัวอย่าง: "https://xxxxxx.supabase.co"
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0.SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";  // ตัวอย่าง: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    const statusEl = document.getElementById("status");
+
+    function updateStatus(msg) {
+      statusEl.innerText = msg;
+    }
+
+    async function main() {
+      console.log("=== START LIFF ===");
+      updateStatus("Preparing your request...");
+
+      // LIFF Initialization
+      try {
+        updateStatus("Connecting...");
+        await liff.init({ liffId: "2010492367-Ad3wEuzW" });
+
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+
+        updateStatus("Authenticating...");
+        const profile = await liff.getProfile();
+        const userId = profile.userId;
+        const name = profile.displayName;
+        const pictureUrl = profile.pictureUrl || "";
+
+        // เตรียม URL สำหรับเปลี่ยนหน้าไปยัง register.html
+        const currentDir = window.location.href.split('?')[0].split('/').slice(0, -1).join('/');
+        const redirectUrl = `${currentDir}/register.html?userId=${encodeURIComponent(userId)}`;
+
+        // ส่งข้อมูลไป Supabase
+        updateStatus("Loading...");
+
+        const payload = {
+          user_id: userId,
+          display_name: name,
+          picture_url: pictureUrl,
+          status: "Pending Register"
+        };
+
+        try {
+          if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+            // รองรับทั้งแบบระบุเฉพาะ Project ID และระบุ URL เต็มรูปแบบ
+            let finalUrl = SUPABASE_URL;
+            if (!SUPABASE_URL.startsWith("http://") && !SUPABASE_URL.startsWith("https://")) {
+              finalUrl = `https://${SUPABASE_URL}.supabase.co`;
+            }
+            const cleanBaseUrl = finalUrl.replace(/\/$/, "");
+            const supabaseEndpoint = `${cleanBaseUrl}/rest/v1/members`;
+
+            await Promise.race([
+              fetch(supabaseEndpoint, {
+                method: "POST",
+                headers: {
+                  "apikey": SUPABASE_ANON_KEY,
+                  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                  "Content-Type": "application/json",
+                  "Prefer": "return=minimal"
+                },
+                body: JSON.stringify(payload),
+                keepalive: true
+              }),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+            ]);
+          } else {
+            console.warn("Supabase configuration is incomplete. Skipping database logging.");
+          }
+        } catch (e) {
+          console.log("Supabase Request finished or timed out (Normal if user already exists):", e);
+        }
+
+        // Redirect
+        updateStatus("Redirecting to registration form...");
+        setTimeout(() => {
+          window.location.replace(redirectUrl);
+        }, 200);
+
+      } catch (err) {
+        console.error("Error:", err);
+        updateStatus("Authentication failed. Please try again.");
+      }
+    }
+
+    main();
+  </script>
+</body>
+
+</html>
