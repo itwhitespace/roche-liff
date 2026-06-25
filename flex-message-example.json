@@ -1,10 +1,4 @@
 {
-  "_comment": "=================================================================",
-  "_note_1": "LINE Flex Message ตัวอย่าง — ฝัง Invisible Tracking Pixel",
-  "_note_2": "วาง JSON นี้ใน CMS/Messaging Engine ของคุณ แล้วแทนค่า ${USER_ID}",
-  "_note_3": "และ URL ของ Pixel Server ก่อนส่งออก",
-  "=================================================================": "",
-
   "type": "flex",
   "altText": "ข้อความใหม่จาก Roche Thailand",
   "contents": {
@@ -51,14 +45,12 @@
         },
         {
           "type": "text",
-          "text": "เนื้อหาของข้อความที่ต้องการส่งถึงบุคลากรทางการแพทย์ สามารถปรับแต่งได้ตามต้องการ",
+          "text": "เนื้อหาของข้อความที่ต้องการส่งถึงบุคลากรทางการแพทย์",
           "size": "sm",
           "color": "#4a5568",
           "wrap": true
         },
-
         {
-          "_comment": "--- ปุ่ม CTA หลัก ---",
           "type": "button",
           "style": "primary",
           "color": "#0055FF",
@@ -66,20 +58,12 @@
           "action": {
             "type": "uri",
             "label": "อ่านเพิ่มเติม",
-            "uri": "https://liff.line.me/2010492367-Ad3wEuzW?target=www.roche.co.th&content_id=sample_content&evensource=Broadcast&evenDA=HCP&CampaignName=sample_campaign"
+            "uri": "https://liff.line.me/2010492367-Ad3wEuzW?target=www.carewell.center&content_id=carewell_center&evensource=Broadcast&evenDA=HCP&CampaignName=carewell_jun2026"
           }
         },
-
         {
-          "_comment": "======================================================",
-          "_comment2": "INVISIBLE TRACKING PIXEL — วางไว้บรรทัดสุดท้ายของ body",
-          "_comment3": "- ขนาด 1x1 pixel, margin: none เพื่อไม่กินพื้นที่",
-          "_comment4": "- action type: uri ชี้ไปที่ Pixel Server ของเรา",
-          "_comment5": "- แทน ${USER_ID} ด้วย LINE userId จริงตอนส่ง",
-          "_comment6": "- แทน PIXEL_SERVER_URL ด้วย URL Server ของคุณ",
-          "======================================================": "",
           "type": "image",
-          "url": "https://PIXEL_SERVER_URL/pixel?user_id=${USER_ID}&content_id=sample_content&campaign_name=sample_campaign&sender_id=broadcast_001",
+          "url": "https://roche-liff.vercel.app/pixel?user_id=REPLACE_USER_ID&content_id=carewell_center&campaign_name=carewell_jun2026&sender_id=broadcast_001",
           "size": "1px",
           "aspectMode": "cover",
           "aspectRatio": "1:1",
@@ -87,7 +71,7 @@
           "action": {
             "type": "uri",
             "label": "pixel",
-            "uri": "https://PIXEL_SERVER_URL/pixel?user_id=${USER_ID}&content_id=sample_content&campaign_name=sample_campaign&sender_id=broadcast_001"
+            "uri": "https://roche-liff.vercel.app/pixel?user_id=REPLACE_USER_ID&content_id=carewell_center&campaign_name=carewell_jun2026&sender_id=broadcast_001"
           }
         }
       ]
