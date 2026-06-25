@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/pixel/:path*",
+      "destination": "/api/pixel"
+    },
+    {
       "source": "/pixel",
       "destination": "/api/pixel"
     }
