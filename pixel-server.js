@@ -9,7 +9,7 @@
  *  Endpoint:
  *    GET /pixel?user_id=Uxxxxxxxx&content_id=...&campaign_name=...
  *    → คืน 1×1 Transparent GIF
- *    → บันทึกข้อมูลลง Supabase ตาราง flex_impressions
+ *    → บันทึกข้อมูลลง Database ตาราง flex_impressions
  *
  *  ไม่ต้องติดตั้ง package เพิ่มเติม — ใช้ Node.js built-in เท่านั้น
  * =====================================================================
@@ -22,10 +22,10 @@ const https = require("https");
 const path  = require("path");
 const fs    = require("fs");
 
-// ─── Supabase Config (ชุดเดิมจาก index.html) ───────────────────────────────
-const SUPABASE_PROJECT_ID = "knkcassjktpolmpdfqfb";
-const SUPABASE_BASE_URL   = `https://${SUPABASE_PROJECT_ID}.supabase.co`;
-const SUPABASE_ANON_KEY   =
+// ─── Database Config (ชุดเดิมจาก index.html) ───────────────────────────────
+const DATABASE_PROJECT_ID = "knkcassjktpolmpdfqfb";
+const DATABASE_BASE_URL   = `https://${DATABASE_PROJECT_ID}.supabase.co`;
+const DATABASE_ANON_KEY   =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
   "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0." +
   "SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";
@@ -35,17 +35,17 @@ const SUPABASE_ANON_KEY   =
 const TRANSPARENT_GIF_B64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 const TRANSPARENT_GIF_BUF = Buffer.from(TRANSPARENT_GIF_B64, "base64");
 
-// ─── ส่งข้อมูลไป Supabase (Node built-in https) ─────────────────────────────
+// ─── ส่งข้อมูลไป Database (Node built-in https) ─────────────────────────────
 function insertImpression(payload) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify(payload);
     const reqOptions = {
-      hostname: `${SUPABASE_PROJECT_ID}.supabase.co`,
+      hostname: `${DATABASE_PROJECT_ID}.supabase.co`,
       path: "/rest/v1/flex_impressions",
       method: "POST",
       headers: {
-        "apikey":        SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "apikey":        DATABASE_ANON_KEY,
+        "Authorization": `Bearer ${DATABASE_ANON_KEY}`,
         "Content-Type":  "application/json",
         "Content-Length": Buffer.byteLength(body),
         "Prefer":        "return=minimal"
@@ -66,7 +66,7 @@ function insertImpression(payload) {
 
     req.on("error", reject);
     req.setTimeout(4000, () => {
-      req.destroy(new Error("Supabase request timeout"));
+      req.destroy(new Error("Database request timeout"));
     });
     req.write(body);
     req.end();
@@ -123,32 +123,32 @@ const server = http.createServer(async (req, res) => {
     const campaignName = (query.campaign_name || "").trim();
     const senderId     = (query.sender_id     || "").trim();
 
-    // บันทึกข้อมูลลง Supabase (Fire-and-forget — ไม่ block การส่งภาพกลับ)
+    // บันทึกข้อมูลลง Database (Fire-and-forget — ไม่ block การส่งภาพกลับ)
     if (userId) {
       const payload = {
         user_id:       userId,
         content_id:    contentId,
         campaign_name: campaignName,
         sender_id:     senderId
-        // created_at ถูกตั้งค่า DEFAULT now() ใน Supabase schema อัตโนมัติ
+        // created_at ถูกตั้งค่า DEFAULT now() ใน Database schema อัตโนมัติ
       };
 
       insertImpression(payload)
         .then((result) => {
           if (!result.ok) {
-            console.warn(`[pixel] Supabase error ${result.status}:`, result.body);
+            console.warn(`[pixel] Database error ${result.status}:`, result.body);
           } else {
             console.log(`[pixel] ✅ Impression logged — user_id: ${userId} | content_id: ${contentId}`);
           }
         })
         .catch((err) => {
-          console.error("[pixel] Supabase request failed:", err.message);
+          console.error("[pixel] Database request failed:", err.message);
         });
     } else {
       console.warn("[pixel] ⚠️  Request received without user_id");
     }
 
-    // คืนรูป 1×1 Transparent GIF ทันที (ไม่รอ Supabase)
+    // คืนรูป 1×1 Transparent GIF ทันที (ไม่รอ Database)
     res.writeHead(200, {
       "Content-Type":    "image/gif",
       "Content-Length":  TRANSPARENT_GIF_BUF.length,

@@ -62,9 +62,9 @@
   </div>
 
   <script>
-    // --- Supabase Config Section (กรอกข้อมูลการเชื่อมต่อที่นี่) ---
-    const SUPABASE_URL = "knkcassjktpolmpdfqfb";       // ตัวอย่าง: "https://xxxxxx.supabase.co"
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0.SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";  // ตัวอย่าง: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    // --- Database Config Section (กรอกข้อมูลการเชื่อมต่อที่นี่) ---
+    const DATABASE_URL = "knkcassjktpolmpdfqfb";       // ตัวอย่าง: "https://xxxxxx.supabase.co"
+    const DATABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0.SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";  // ตัวอย่าง: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
     const statusEl = document.getElementById("status");
 
@@ -135,24 +135,24 @@
         const isTracking = target !== "";
         const redirectUrl = isTracking ? finalUrl : `${currentDir}/register.html?userId=${encodeURIComponent(userId)}`;
 
-        // ส่งข้อมูลไป Supabase
+        // ส่งข้อมูลไป Database
         updateStatus("Loading...");
 
         try {
-          if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            let finalUrlSupabase = SUPABASE_URL;
-            if (!SUPABASE_URL.startsWith("http://") && !SUPABASE_URL.startsWith("https://")) {
-              finalUrlSupabase = `https://${SUPABASE_URL}.supabase.co`;
+          if (DATABASE_URL && DATABASE_ANON_KEY) {
+            let finalUrlDatabase = DATABASE_URL;
+            if (!DATABASE_URL.startsWith("http://") && !DATABASE_URL.startsWith("https://")) {
+              finalUrlDatabase = `https://${DATABASE_URL}.supabase.co`;
             }
-            const cleanBaseUrl = finalUrlSupabase.replace(/\/$/, "");
+            const cleanBaseUrl = finalUrlDatabase.replace(/\/$/, "");
 
             const sendPost = (endpoint, payloadData) => {
               return Promise.race([
                 fetch(endpoint, {
                   method: "POST",
                   headers: {
-                    "apikey": SUPABASE_ANON_KEY,
-                    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                    "apikey": DATABASE_ANON_KEY,
+                    "Authorization": `Bearer ${DATABASE_ANON_KEY}`,
                     "Content-Type": "application/json",
                     "Prefer": "return=minimal"
                   },
@@ -173,7 +173,7 @@
               };
               await sendPost(`${cleanBaseUrl}/rest/v1/members`, memberPayload);
             } catch (memberErr) {
-              console.log("Supabase members insert finished or failed (Normal if user already exists):", memberErr);
+              console.log("Database members insert finished or failed (Normal if user already exists):", memberErr);
             }
 
             // 2. หากเป็น Tracking Link ให้บันทึก liff_logs ด้วย
@@ -199,14 +199,14 @@
                 localStorage.removeItem("evenDA");
                 localStorage.removeItem("campaignName");
               } catch (logErr) {
-                console.error("Supabase liff_logs insert failed:", logErr);
+                console.error("Database liff_logs insert failed:", logErr);
               }
             }
           } else {
-            console.warn("Supabase configuration is incomplete. Skipping database logging.");
+            console.warn("Database configuration is incomplete. Skipping database logging.");
           }
         } catch (e) {
-          console.log("Supabase Request finished or timed out:", e);
+          console.log("Database Request finished or timed out:", e);
         }
 
         // Redirect

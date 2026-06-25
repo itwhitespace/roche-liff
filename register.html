@@ -477,9 +477,9 @@
   </div>
 
   <script>
-    // --- Supabase Config Section (กรอกข้อมูลการเชื่อมต่อที่นี่) ---
-    const SUPABASE_URL = "knkcassjktpolmpdfqfb";       // ตัวอย่าง: "https://xxxxxx.supabase.co"
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0.SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";  // ตัวอย่าง: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    // --- Database Config Section (กรอกข้อมูลการเชื่อมต่อที่นี่) ---
+    const DATABASE_URL = "knkcassjktpolmpdfqfb";       // ตัวอย่าง: "https://xxxxxx.supabase.co"
+    const DATABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0.SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";  // ตัวอย่าง: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
     // ดึงค่า userId จาก URL Parameter เมื่อโหลดหน้าจอ
     document.addEventListener("DOMContentLoaded", () => {
@@ -515,7 +515,7 @@
       }
     }
 
-    // ฟังก์ชันส่งข้อมูลไปยัง Supabase เพื่อทำการ Update (PATCH)
+    // ฟังก์ชันส่งข้อมูลไปยัง Database เพื่อทำการ Update (PATCH)
     async function submitForm(event) {
       event.preventDefault();
 
@@ -580,24 +580,24 @@
       };
 
       try {
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-          throw new Error("กรุณาตั้งค่า Supabase URL และ Anon Key ที่ตัวโค้ดก่อนเริ่มใช้งาน");
+        if (!DATABASE_URL || !DATABASE_ANON_KEY) {
+          throw new Error("กรุณาตั้งค่า Database URL และ Anon Key ที่ตัวโค้ดก่อนเริ่มใช้งาน");
         }
 
         // รองรับทั้งแบบระบุเฉพาะ Project ID และระบุ URL เต็มรูปแบบ
-        let finalUrl = SUPABASE_URL;
-        if (!SUPABASE_URL.startsWith("http://") && !SUPABASE_URL.startsWith("https://")) {
-          finalUrl = `https://${SUPABASE_URL}.supabase.co`;
+        let finalUrl = DATABASE_URL;
+        if (!DATABASE_URL.startsWith("http://") && !DATABASE_URL.startsWith("https://")) {
+          finalUrl = `https://${DATABASE_URL}.supabase.co`;
         }
         const cleanBaseUrl = finalUrl.replace(/\/$/, "");
         // ใช้ PATCH ค้นหาเงื่อนไข user_id เท่ากับค่าที่เราส่งมา (?user_id=eq.xxxx)
-        const supabaseEndpoint = `${cleanBaseUrl}/rest/v1/members?user_id=eq.${encodeURIComponent(userId)}`;
+        const databaseEndpoint = `${cleanBaseUrl}/rest/v1/members?user_id=eq.${encodeURIComponent(userId)}`;
 
-        const response = await fetch(supabaseEndpoint, {
+        const response = await fetch(databaseEndpoint, {
           method: "PATCH",
           headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "apikey": DATABASE_ANON_KEY,
+            "Authorization": `Bearer ${DATABASE_ANON_KEY}`,
             "Content-Type": "application/json",
             "Prefer": "return=minimal"
           },

@@ -18,9 +18,9 @@
 
 const https = require("https");
 
-// ─── Supabase Config (ชุดเดิมจาก index.html) ───────────────────────────────
-const SUPABASE_PROJECT_ID = "knkcassjktpolmpdfqfb";
-const SUPABASE_ANON_KEY =
+// ─── Database Config (ชุดเดิมจาก index.html) ───────────────────────────────
+const DATABASE_PROJECT_ID = "knkcassjktpolmpdfqfb";
+const DATABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
   "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0." +
   "SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";
@@ -29,17 +29,17 @@ const SUPABASE_ANON_KEY =
 const TRANSPARENT_GIF_B64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 const TRANSPARENT_GIF_BUF = Buffer.from(TRANSPARENT_GIF_B64, "base64");
 
-// ─── Insert ข้อมูลไป Supabase ───────────────────────────────────────────────
+// ─── Insert ข้อมูลไป Database ───────────────────────────────────────────────
 function insertImpression(payload) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify(payload);
     const reqOptions = {
-      hostname: `${SUPABASE_PROJECT_ID}.supabase.co`,
+      hostname: `${DATABASE_PROJECT_ID}.supabase.co`,
       path: "/rest/v1/flex_impressions",
       method: "POST",
       headers: {
-        "apikey":         SUPABASE_ANON_KEY,
-        "Authorization":  `Bearer ${SUPABASE_ANON_KEY}`,
+        "apikey":         DATABASE_ANON_KEY,
+        "Authorization":  `Bearer ${DATABASE_ANON_KEY}`,
         "Content-Type":   "application/json",
         "Content-Length": Buffer.byteLength(body),
         "Prefer":         "return=minimal"
@@ -59,7 +59,7 @@ function insertImpression(payload) {
     });
 
     req.on("error", reject);
-    req.setTimeout(5000, () => req.destroy(new Error("Supabase timeout")));
+    req.setTimeout(5000, () => req.destroy(new Error("Database timeout")));
     req.write(body);
     req.end();
   });
@@ -87,7 +87,7 @@ module.exports = async function handler(req, res) {
   const campaignName = (req.query.campaign_name || "").trim();
   const senderId     = (req.query.sender_id     || "").trim();
 
-  // บันทึก Impression ลง Supabase (fire-and-forget)
+  // บันทึก Impression ลง Database (fire-and-forget)
   if (userId) {
     insertImpression({
       user_id:       userId,
@@ -97,17 +97,17 @@ module.exports = async function handler(req, res) {
     })
       .then((result) => {
         if (!result.ok) {
-          console.warn(`[pixel] Supabase error ${result.status}:`, result.body);
+          console.warn(`[pixel] Database error ${result.status}:`, result.body);
         } else {
           console.log(`[pixel] ✅ ${userId} | ${contentId} | ${campaignName}`);
         }
       })
-      .catch((err) => console.error("[pixel] Supabase failed:", err.message));
+      .catch((err) => console.error("[pixel] Database failed:", err.message));
   } else {
     console.warn("[pixel] ⚠️  Request without user_id");
   }
 
-  // ส่ง 1×1 Transparent GIF กลับทันที — ไม่รอ Supabase
+  // ส่ง 1×1 Transparent GIF กลับทันที — ไม่รอ Database
   res.setHeader("Content-Type",   "image/gif");
   res.setHeader("Content-Length", TRANSPARENT_GIF_BUF.length);
   res.setHeader("Cache-Control",  "no-store, no-cache, must-revalidate, proxy-revalidate");

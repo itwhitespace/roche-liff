@@ -1,6 +1,6 @@
 -- =====================================================================
---  Supabase SQL: สร้างตาราง flex_impressions
---  รันใน Supabase Dashboard → SQL Editor
+--  Database SQL: สร้างตาราง flex_impressions
+--  รันใน Database Dashboard → SQL Editor
 -- =====================================================================
 
 -- สร้างตาราง
