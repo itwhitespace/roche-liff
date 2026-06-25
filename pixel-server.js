@@ -19,7 +19,6 @@
 
 const http  = require("http");
 const https = require("https");
-const url   = require("url");
 const path  = require("path");
 const fs    = require("fs");
 
@@ -101,9 +100,9 @@ function serveStatic(res, filePath) {
 
 // ─── HTTP Server ──────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
-  const parsed   = url.parse(req.url, true);
+  const parsed   = new URL(req.url, `http://localhost`);
   const pathname = parsed.pathname;
-  const query    = parsed.query;
+  const query    = Object.fromEntries(parsed.searchParams);
 
   // ── CORS headers (สำหรับ LINE เรียกจาก domain อื่น) ──
   res.setHeader("Access-Control-Allow-Origin",  "*");
