@@ -87,22 +87,23 @@ module.exports = async function handler(req, res) {
   const campaignName = (req.query.campaign_name || "").trim();
   const senderId     = (req.query.sender_id     || "").trim();
 
-  // บันทึก Impression ลง Database (fire-and-forget)
+  // บันทึก Impression ลง Database (ต้อง await เสมอใน Vercel Serverless ไม่งั้นจะโดนตัดจบการทำงานก่อน)
   if (userId) {
-    insertImpression({
-      user_id:       userId,
-      content_id:    contentId,
-      campaign_name: campaignName,
-      sender_id:     senderId
-    })
-      .then((result) => {
-        if (!result.ok) {
-          console.warn(`[pixel] Database error ${result.status}:`, result.body);
-        } else {
-          console.log(`[pixel] ✅ ${userId} | ${contentId} | ${campaignName}`);
-        }
-      })
-      .catch((err) => console.error("[pixel] Database failed:", err.message));
+    try {
+      const result = await insertImpression({
+        user_id:       userId,
+        content_id:    contentId,
+        campaign_name: campaignName,
+        sender_id:     senderId
+      });
+      if (!result.ok) {
+        console.warn(`[pixel] Database error ${result.status}:`, result.body);
+      } else {
+        console.log(`[pixel] ✅ ${userId} | ${contentId} | ${campaignName}`);
+      }
+    } catch (err) {
+      console.error("[pixel] Database failed:", err.message);
+    }
   } else {
     console.warn("[pixel] ⚠️  Request without user_id");
   }
