@@ -1,0 +1,13 @@
+{
+  "name": "roche-liff-entry",
+  "version": "1.0.0",
+  "description": "Roche LIFF Entry Page with Invisible Tracking Pixel Server",
+  "main": "pixel-server.js",
+  "scripts": {
+    "pixel": "node pixel-server.js",
+    "start": "node pixel-server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
