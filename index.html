@@ -90,16 +90,24 @@
 
       let contentId = getQueryParam("content_id") || localStorage.getItem("contentId") || "unknown";
       let target = getQueryParam("target") || localStorage.getItem("target") || "";
+      let evensource = getQueryParam("evensource") || localStorage.getItem("evensource") || "";
+      let evenDA = getQueryParam("evenDA") || localStorage.getItem("evenDA") || "";
+      let campaignName = getQueryParam("CampaignName") || localStorage.getItem("campaignName") || "";
 
       // เก็บค่าเข้า localStorage กันหายระหว่าง Login
       if (contentId !== "unknown") localStorage.setItem("contentId", contentId);
       if (target !== "") localStorage.setItem("target", target);
+      if (evensource !== "") localStorage.setItem("evensource", evensource);
+      if (evenDA !== "") localStorage.setItem("evenDA", evenDA);
+      if (campaignName !== "") localStorage.setItem("campaignName", campaignName);
 
       // เตรียม URL ปลายทางกรณีเป็น Tracking Link
       let finalUrl = "";
       if (target) {
         if (target.startsWith("http://") || target.startsWith("https://")) {
           finalUrl = target;
+        } else if (target.startsWith("www.")) {
+          finalUrl = "https://" + target;
         } else {
           const base = "https://www.roche.co.th/";
           finalUrl = base + target.replace(/^\/+/, "");
@@ -125,23 +133,6 @@
         // เตรียมข้อมูลปลายทาง
         const currentDir = window.location.href.split('?')[0].split('/').slice(0, -1).join('/');
         const isTracking = target !== "";
-        
-        // แยก Payload และตารางที่ต้องการบันทึกตามประเภทการเข้าใช้งาน
-        const payload = isTracking ? {
-          user_id: userId,
-          display_name: name,
-          picture_url: pictureUrl,
-          content_id: contentId,
-          target: target,
-          full_url: finalUrl
-        } : {
-          user_id: userId,
-          display_name: name,
-          picture_url: pictureUrl,
-          status: "Pending Register"
-        };
-
-        const tableName = isTracking ? "liff_logs" : "members";
         const redirectUrl = isTracking ? finalUrl : `${currentDir}/register.html?userId=${encodeURIComponent(userId)}`;
 
         // ส่งข้อมูลไป Supabase
@@ -154,27 +145,62 @@
               finalUrlSupabase = `https://${SUPABASE_URL}.supabase.co`;
             }
             const cleanBaseUrl = finalUrlSupabase.replace(/\/$/, "");
-            const supabaseEndpoint = `${cleanBaseUrl}/rest/v1/${tableName}`;
 
-            await Promise.race([
-              fetch(supabaseEndpoint, {
-                method: "POST",
-                headers: {
-                  "apikey": SUPABASE_ANON_KEY,
-                  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-                  "Content-Type": "application/json",
-                  "Prefer": "return=minimal"
-                },
-                body: JSON.stringify(payload),
-                keepalive: true
-              }),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
-            ]);
+            const sendPost = (endpoint, payloadData) => {
+              return Promise.race([
+                fetch(endpoint, {
+                  method: "POST",
+                  headers: {
+                    "apikey": SUPABASE_ANON_KEY,
+                    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                  },
+                  body: JSON.stringify(payloadData),
+                  keepalive: true
+                }),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+              ]);
+            };
 
-            // บันทึกสำเร็จ ให้ล้าง localStorage ของระบบ Redirect Link
+            // 1. บันทึกข้อมูลสมาชิกแบบ Pending Register เสมอ (หากยังไม่มีในระบบ)
+            try {
+              const memberPayload = {
+                user_id: userId,
+                display_name: name,
+                picture_url: pictureUrl,
+                status: "Pending Register"
+              };
+              await sendPost(`${cleanBaseUrl}/rest/v1/members`, memberPayload);
+            } catch (memberErr) {
+              console.log("Supabase members insert finished or failed (Normal if user already exists):", memberErr);
+            }
+
+            // 2. หากเป็น Tracking Link ให้บันทึก liff_logs ด้วย
             if (isTracking) {
-              localStorage.removeItem("target");
-              localStorage.removeItem("contentId");
+              try {
+                const logPayload = {
+                  user_id: userId,
+                  display_name: name,
+                  picture_url: pictureUrl,
+                  content_id: contentId,
+                  target: target,
+                  full_url: finalUrl,
+                  even_source: evensource,
+                  even_da: evenDA,
+                  campaign_name: campaignName
+                };
+                await sendPost(`${cleanBaseUrl}/rest/v1/liff_logs`, logPayload);
+
+                // บันทึกสำเร็จ ให้ล้าง localStorage ของระบบ Redirect Link
+                localStorage.removeItem("target");
+                localStorage.removeItem("contentId");
+                localStorage.removeItem("evensource");
+                localStorage.removeItem("evenDA");
+                localStorage.removeItem("campaignName");
+              } catch (logErr) {
+                console.error("Supabase liff_logs insert failed:", logErr);
+              }
             }
           } else {
             console.warn("Supabase configuration is incomplete. Skipping database logging.");
