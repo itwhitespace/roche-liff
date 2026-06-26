@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,14 @@
   <!-- Google Fonts: Inter & Sarabun for premium typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <style>
     :root {
-      --primary-color: #0055ff;      /* Roche Blue */
+      --primary-color: #0055ff;
+      /* Roche Blue */
       --primary-hover: #0040c7;
       --bg-color: #f5f7fb;
       --card-bg: #ffffff;
@@ -316,23 +320,49 @@
 
     /* Animations */
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes scaleUp {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
     }
 
     /* Responsive */
@@ -340,18 +370,22 @@
       body {
         padding: 10px 5px;
       }
+
       .register-container {
         border-radius: 12px;
       }
+
       .header-banner {
         padding: 24px 16px;
       }
+
       .form-wrapper {
         padding: 16px;
       }
     }
   </style>
 </head>
+
 <body>
 
   <div class="register-container">
@@ -375,7 +409,7 @@
 
         <!-- Personal Info -->
         <div class="section-title">ข้อมูลส่วนตัว</div>
-        
+
         <div class="form-group required">
           <label for="firstName">ชื่อ (ภาษาไทย)</label>
           <input type="text" id="firstName" name="firstName" placeholder="ตัวอย่าง: สมชาย" required>
@@ -428,14 +462,56 @@
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group required">
           <label for="specialty">ความเชี่ยวชาญ</label>
-          <select id="specialty" name="specialty">
-            <option value="">-- เลือกความเชี่ยวชาญ (หากมี) --</option>
+          <select id="specialty" name="specialty" required>
+            <option value="">-- เลือกความเชี่ยวชาญ --</option>
             <option value="Anesthesiology">Anesthesiology</option>
             <option value="Cardiology">Cardiology</option>
             <option value="Dermatology">Dermatology</option>
             <option value="Endocrinology / Diabetes and Metabolism">Endocrinology / Diabetes and Metabolism</option>
+            <option value="Family Medicine">Family Medicine</option>
+            <option value="Gastroenterology">Gastroenterology</option>
+            <option value="General Nursing">General Nursing</option>
+            <option value="General Practice">General Practice</option>
+            <option value="General Preventive Medicine">General Preventive Medicine</option>
+            <option value="General Surgery">General Surgery</option>
+            <option value="Gynaecological Oncology">Gynaecological Oncology</option>
+            <option value="Gynaecology">Gynaecology</option>
+            <option value="Haematology (Internal Medicine)">Haematology (Internal Medicine)</option>
+            <option value="Hepatobiliary Surgery">Hepatobiliary Surgery</option>
+            <option value="Hepatology">Hepatology</option>
+            <option value="Infectious Disease">Infectious Disease</option>
+            <option value="Internal Medicine">Internal Medicine</option>
+            <option value="Interventional Radiology">Interventional Radiology</option>
+            <option value="Medical Oncology">Medical Oncology</option>
+            <option value="Nephrology">Nephrology</option>
+            <option value="Neurology">Neurology</option>
+            <option value="Nutrition">Nutrition</option>
+            <option value="Ophthalmology">Ophthalmology</option>
+            <option value="Orthopaedics">Orthopaedics</option>
+            <option value="Other">Other</option>
+            <option value="Otolaryngology / Ear, Nose and Throat">Otolaryngology / Ear, Nose and Throat</option>
+            <option value="Paediatric Endocrinology">Paediatric Endocrinology</option>
+            <option value="Paediatric Gastroenterology">Paediatric Gastroenterology</option>
+            <option value="Paediatric Haematology">Paediatric Haematology</option>
+            <option value="Paediatric Infectious Disease">Paediatric Infectious Disease</option>
+            <option value="Paediatric Nephrology">Paediatric Nephrology</option>
+            <option value="Paediatric Neurology">Paediatric Neurology</option>
+            <option value="Paediatrics">Paediatrics</option>
+            <option value="Pathology">Pathology</option>
+            <option value="Pharmaceutical Medicine">Pharmaceutical Medicine</option>
+            <option value="Physical Medicine and Rehabilitation">Physical Medicine and Rehabilitation</option>
+            <option value="Psychiatry">Psychiatry</option>
+            <option value="Pulmonary Disease">Pulmonary Disease</option>
+            <option value="Radiation Oncology">Radiation Oncology</option>
+            <option value="Radiology">Radiology</option>
+            <option value="Retinal Ophthalmology">Retinal Ophthalmology</option>
+            <option value="Rheumatology">Rheumatology</option>
+            <option value="Surgical Oncology">Surgical Oncology</option>
+            <option value="Thoracic Surgery">Thoracic Surgery</option>
+            <option value="Unspecified">Unspecified</option>
+            <option value="Urology">Urology</option>
           </select>
         </div>
 
@@ -446,7 +522,7 @@
 
         <!-- Legal Agreement Checkboxes -->
         <div class="section-title">ข้อมูลด้านกฎหมาย</div>
-        
+
         <div class="checkbox-group">
           <label class="checkbox-option">
             <input type="checkbox" id="consentPolicy" name="consentPolicy" required>
@@ -485,7 +561,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
       const userIdVal = urlParams.get("userId");
-      
+
       const alertBox = document.getElementById("alertBox");
       const alertMsg = document.getElementById("alertMsg");
       const submitBtn = document.getElementById("submitBtn");
@@ -535,14 +611,14 @@
       const lastName = document.getElementById("lastName").value.trim();
       const phone = document.getElementById("phone").value.trim();
       const email = document.getElementById("email").value.trim();
-      
+
       // หาค่า radio
       const occupationElement = document.querySelector('input[name="occupation"]:checked');
       const occupation = occupationElement ? occupationElement.value : "";
-      
+
       const specialty = document.getElementById("specialty").value;
       const organization = document.getElementById("organization").value.trim();
-      
+
       const consentPolicy = document.getElementById("consentPolicy").checked;
       const consentProcessing = document.getElementById("consentProcessing").checked;
 
@@ -553,7 +629,7 @@
         return;
       }
 
-      if (!firstName || !lastName || !email || !occupation || !consentPolicy || !consentProcessing) {
+      if (!firstName || !lastName || !email || !occupation || !specialty || !consentPolicy || !consentProcessing) {
         alertBox.style.display = "flex";
         alertMsg.innerText = "กรุณากรอกข้อมูลและยอมรับเงื่อนไขที่จำเป็นทั้งหมด";
         return;
@@ -617,7 +693,7 @@
         console.error("Error updating member:", error);
         alertBox.style.display = "flex";
         alertMsg.innerText = `เกิดข้อผิดพลาด: ${error.message}`;
-        
+
         // กู้คืนปุ่มส่งข้อมูลให้คลิกใหม่ได้
         submitBtn.disabled = false;
         btnSpinner.style.display = "none";
@@ -626,4 +702,5 @@
     }
   </script>
 </body>
+
 </html>
