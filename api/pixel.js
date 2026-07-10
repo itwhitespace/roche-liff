@@ -18,23 +18,36 @@
 
 const https = require("https");
 
-// ─── Database Config (ชุดเดิมจาก index.html) ───────────────────────────────
-const DATABASE_PROJECT_ID = "knkcassjktpolmpdfqfb";
-const DATABASE_ANON_KEY =
+// ─── Database Config (อ่านค่าจาก Env variables ก่อน หรือ fallback ไปที่ default credentials) ───────────────────────────────
+const DEFAULT_DATABASE_PROJECT_ID = "knkcassjktpolmpdfqfb";
+const DEFAULT_DATABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
   "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtua2Nhc3Nqa3Rwb2xtcGRmcWZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNjQxMDAsImV4cCI6MjA5Nzg0MDEwMH0." +
   "SGUaY4AiCV70Wj4UdxZP3pf7RHFT-E1HBGFPXFkCLvg";
 
-// ─── 1×1 Transparent GIF ────────────────────────────────────────────────────
-const TRANSPARENT_GIF_B64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-const TRANSPARENT_GIF_BUF = Buffer.from(TRANSPARENT_GIF_B64, "base64");
+const DATABASE_ANON_KEY = process.env.NEXT_PUBLIC_DATABASE_ANON_KEY || process.env.DATABASE_ANON_KEY || DEFAULT_DATABASE_ANON_KEY;
+const DATABASE_URL = process.env.NEXT_PUBLIC_DATABASE_URL || process.env.DATABASE_URL;
+
+let DATABASE_HOSTNAME = `${DEFAULT_DATABASE_PROJECT_ID}.supabase.co`;
+if (DATABASE_URL) {
+  try {
+    const parsedUrl = new URL(DATABASE_URL);
+    DATABASE_HOSTNAME = parsedUrl.hostname;
+  } catch (e) {
+    DATABASE_HOSTNAME = DATABASE_URL.replace(/^https?:\/\//, "").split("/")[0];
+  }
+}
+
+// ─── 1×1 Transparent PNG (เปลี่ยนจาก GIF เป็น PNG เพื่อให้ตรงตามมาตรฐาน LINE) ────────────────────────────────────────────────────
+const TRANSPARENT_PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+const TRANSPARENT_PNG_BUF = Buffer.from(TRANSPARENT_PNG_B64, "base64");
 
 // ─── Insert ข้อมูลไป Database ───────────────────────────────────────────────
 function insertImpression(payload) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify(payload);
     const reqOptions = {
-      hostname: `${DATABASE_PROJECT_ID}.supabase.co`,
+      hostname: DATABASE_HOSTNAME,
       path: "/rest/v1/flex_impressions",
       method: "POST",
       headers: {
@@ -108,13 +121,14 @@ module.exports = async function handler(req, res) {
     console.warn("[pixel] ⚠️  Request without user_id");
   }
 
-  // ส่ง 1×1 Transparent GIF กลับทันที — ไม่รอ Database
-  res.setHeader("Content-Type",   "image/gif");
-  res.setHeader("Content-Length", TRANSPARENT_GIF_BUF.length);
+  // ส่ง 1×1 Transparent PNG กลับทันที
+  res.setHeader("Content-Type",   "image/png");
+  res.setHeader("Content-Length", TRANSPARENT_PNG_BUF.length);
   res.setHeader("Cache-Control",  "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.setHeader("Pragma",         "no-cache");
   res.setHeader("Expires",        "0");
   res.setHeader("X-Pixel-Status", userId ? "tracked" : "skipped");
 
-  return res.status(200).end(TRANSPARENT_GIF_BUF);
+  return res.status(200).end(TRANSPARENT_PNG_BUF);
 };
+
